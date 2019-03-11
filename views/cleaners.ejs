@@ -1,0 +1,213 @@
+<head>
+    <title></title>
+    
+
+    <% include ../views/partials/head %>
+    <link rel='stylesheet' href='/stylesheets/edit.css' />
+    <script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    
+    
+  </head>
+  <header>
+    <% include ../views/partials/header %>
+  </header>
+  <style>
+div.box{
+  background-color: lightgrey;
+  width: 600px;
+  border: 0px solid green;
+  padding: 20px;
+  margin: 25px;
+}
+@media print {
+   .col-sm-1, .col-sm-2, .col-sm-3, .col-sm-4, .col-sm-5, .col-sm-6, .col-sm-7, .col-sm-8, .col-sm-9, .col-sm-10, .col-sm-11, .col-sm-12 {
+        float: left;
+   }
+   .col-sm-12 {
+        width: 100%;
+   }
+   .col-sm-11 {
+        width: 91.66666667%;
+   }
+   .col-sm-10 {
+        width: 83.33333333%;
+   }
+   .col-sm-9 {
+        width: 75%;
+   }
+   .col-sm-8 {
+        width: 66.66666667%;
+   }
+   .col-sm-7 {
+        width: 58.33333333%;
+   }
+   .col-sm-6 {
+        width: 50%;
+   }
+   .col-sm-5 {
+        width: 41.66666667%;
+   }
+   .col-sm-4 {
+        width: 33.33333333%;
+   }
+   .col-sm-3 {
+        width: 25%;
+   }
+   .col-sm-2 {
+        width: 16.66666667%;
+   }
+   .col-sm-1 {
+        width: 8.33333333%;
+   }
+}
+</style>
+
+<body>
+  <h3>Stair List</h3>
+  <p></p>
+  <p></p>
+  <p></p>
+  <h3><%=name%> </h3>
+  
+  
+<div class='box'>
+  <h3>WeekEnding Date: <span></span></h3>
+  <h4>Select week:</h4>
+<select class='myselect'>
+  <option value='All'>All</option>
+  <option id='A' value='A_week'>A Week</option>
+  <option id='B' value='B_week'>B Week</option>
+</select>
+<button id='print'>print</button>
+<h4></h4><h5></h5>
+</div>
+  <div class='details'></div>  
+  <div class='container'>
+    <div class='row'>
+      <div class="col-sm-2">col-sm-8</div>
+      <div class="col-sm-6">col-sm-4</div>
+      <div class="col-sm-4">col-sm-4</div>
+    </div>
+
+    <table class='table'>
+      <thead>
+        <th>Stair</th>
+        <th>Frequency</th>
+        <th>Next Clean</th>
+        <th>Cleaner</th>
+      </thead>
+      <tbody>
+        <%for(var k=0;k< rows.length;k++){%>
+      <tr>
+        <td><%=rows[k].stair%></td>
+        <td><%=freq[rows[k].freq]%></td>
+        <td><%=rows[k].date%></td>
+        <td><%=name%></td>
+      </tr>
+        <% } %>        
+      </tbody>
+    </table>
+  </div>
+	   
+</body>
+<script>
+  //$(document).ready(function () {
+  $('.box .myselect').on('click',function(){
+    ///////////////////////////////////////
+    var today = new Date();
+    var end_of_week=new Date();
+    end_of_week.setDate(end_of_week.getDate() + 7-today.getDay());
+    var end_of_week_date=(new Date(end_of_week))
+    var week=$('.box .myselect').val()
+    var hidden_week=''
+    if(week==='A_week'){hidden_week='B_week'}
+    if(week==='B_week'){hidden_week='A_week'}
+    $('.box h4:eq(1)').empty().append($('.box .myselect').val())
+
+    $('.container .table tbody tr').each(function(i){
+     //console.log('in each'+i+'  '+$(this).find(' td:eq(2)').text().length)
+     var next_clean_date=(new Date($(this).find(' td:eq(2)').text()));
+    
+    if($('.box .myselect').val()==='All'){return}// if 'All' selected skip rest
+
+     if($(this).find(' td:eq(1)').text()===hidden_week ||
+      ($(this).find(' td:eq(2)').text().length!=0 &&
+      end_of_week_date<next_clean_date))
+     {
+      
+      //console.log('eq(i)='+i+'end_of_week_date='+end_of_week_date+
+        //'next_clean_date='+next_clean_date)                        
+      $(this).toggle()
+     }// if
+    })//each
+    var week_=''
+    if(end_of_week.getWeek()%2===0){
+      week_='A_week'
+    }
+    else{week_='B-week'}
+      $('.container .row .col-sm-2').empty().append('<h3> '+week_+'</h3>')
+      $('.container .row .col-sm-6').empty().append('<h3>W/Ending:'+end_of_week.toShortFormat()+'</h3>')
+      $('.container .row .col-sm-4').empty().append('<h3>'+$('.container .table tbody tr:visible').length+' Stairs</h3>')
+    /*
+    $('.container .row .col-sm-4').empty().append('<h3>'+week+'</br>Week Ending:  '+
+      end_of_week.toShortFormat()+'</br> No. of Stairs: '+
+      $('.container .table tbody tr:visible').length+'</br> Week: '+
+      end_of_week.getWeek()+'</br> Week_: '+
+      week_+'</h3>')
+      */
+    console.log('records='+$('.container .table tbody tr:visible').length)
+    $('.box h5').empty()
+      .append('Total : '+$('.container .table tbody tr:visible').length)
+  })//on click
+ // })//doc ready
+  ///////////////////////////////////////////////
+  Date.prototype.getWeek = function() {
+  var sixjan = new Date(this.getFullYear(),0,6);
+  return Math.ceil((((this - sixjan) / 86400000) + sixjan.getDay()+1)/7);
+}
+
+  Date.prototype.toShortFormat = function() {
+
+    var month_names =["Jan","Feb","Mar",
+                      "Apr","May","Jun",
+                      "Jul","Aug","Sep",
+                      "Oct","Nov","Dec"];
+    
+    var day = this.getDate();
+    var month_index = this.getMonth();
+    var year = this.getFullYear();
+    
+    return "" + day + " " + month_names[month_index] + " " + year;
+}
+
+  var today = new Date();
+  //d.toDateString();
+  //$('body p:eq(0)').append(today+'  '+today.getDay())
+  $('body p:eq(1)').append(today.toShortFormat())
+  
+  var end_of_week=new Date();
+  end_of_week.setDate(end_of_week.getDate() + 7-today.getDay());
+  //console.log('date=='+end_of_week.toShortFormat())
+  //console.log('comp date==='+(new Date(end_of_week)))
+  //console.log('comp 24 Feb 19==='+(new Date('24 Feb 19')))
+  //if((new Date(end_of_week))>(new Date('24 Feb 19'))){
+    //console.log('end_of_week>24 Feb 19')
+  //}
+  $('.box h3').append(end_of_week.toShortFormat())
+  //$('body p').append(d.toLocaleDateString())
+  //////////////////  print ///////
+  $(document).bind("keyup keydown", function (e){
+    console.log('doc cntl P')
+    $('.box').css({'display': 'none'})
+    if(e.ctrlKey && e.keyCode === 80){
+  //    print()
+    }
+  })
+
+  $('body button#print').on('click', function(e){
+    console.log('in print')
+    $('.box').css({'display': 'none'})
+    print();
+  })
+
+</script>
