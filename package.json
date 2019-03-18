@@ -6,6 +6,7 @@
   "scripts": {
     "start": "app.js"
   },
+
   "author": "eric calder",
   "license": "ISC",
   "dependencies": {
