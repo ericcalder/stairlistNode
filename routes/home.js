@@ -3,8 +3,9 @@ var router = express.Router();
 var CsvReadableStream = require('csv-reader');
 var fs = require('fs');
 //var bodyParser = require('body-parser');
-/*
+
 const mysql=require('mysql');
+/*
 const connection = mysql.createConnection({
         host     : 'localhost',
         user     : 'stairadmin',
