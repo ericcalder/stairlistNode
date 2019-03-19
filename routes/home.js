@@ -3,6 +3,7 @@ var router = express.Router();
 var CsvReadableStream = require('csv-reader');
 var fs = require('fs');
 //var bodyParser = require('body-parser');
+/*
 const mysql=require('mysql');
 const connection = mysql.createConnection({
         host     : 'localhost',
@@ -11,7 +12,9 @@ const connection = mysql.createConnection({
       database: 'stairadmin',
       timezone: 'utc'
     });
-
+*/
+const connection = mysql.createConnection(process.env.JAWSDB_URL);
+/// changes connection to JAWSDB
 
 router.get('/', function(req,res){
 	console.log('in router index')
