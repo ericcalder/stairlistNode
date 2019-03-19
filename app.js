@@ -2,6 +2,7 @@ var express=require('express');
 var bodyParser = require('body-parser');
 var path = require('path');
 var fs = require('fs');
+const mysql=require('mysql');
 
 var app = express();
 var index = require('./routes/index');
