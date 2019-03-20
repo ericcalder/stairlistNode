@@ -4,6 +4,12 @@ var path = require('path');
 var fs = require('fs');
 const mysql=require('mysql');
 
+let port = process.env.PORT;
+if (port == null || port == "") {
+  port = 3000;
+}
+
+
 var app = express();
 var index = require('./routes/index');
 var home = require('./routes/home');
@@ -33,4 +39,4 @@ res.render('login');
 
 
 
-app.listen(process.env.PORT);
+app.listen(port);

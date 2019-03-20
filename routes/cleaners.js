@@ -2,7 +2,11 @@ var express = require('express');
 var router = express.Router();
 var path = require('path');
 const mysql=require('mysql');
-/*
+
+if(process.env.JAWSDB_URL){
+var connection = mysql.createConnection(process.env.JAWSDB_URL);  
+}
+else {
 const connection = mysql.createConnection({
         host     : 'localhost',
         user     : 'stairadmin',
@@ -10,9 +14,8 @@ const connection = mysql.createConnection({
       database: 'stairadmin',
       timezone: 'utc'
     });
-*/
-const connection = mysql.createConnection(process.env.JAWSDB_URL);
-/// changes connection to JAWSDB
+}
+
 router.get('/', function(req,res){
 	console.log('in router claeners')
 	var id='';

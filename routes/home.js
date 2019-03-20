@@ -5,7 +5,11 @@ var fs = require('fs');
 //var bodyParser = require('body-parser');
 
 const mysql=require('mysql');
-/*
+
+if(process.env.JAWSDB_URL){
+var connection = mysql.createConnection(process.env.JAWSDB_URL);  
+}
+else {
 const connection = mysql.createConnection({
         host     : 'localhost',
         user     : 'stairadmin',
@@ -13,8 +17,8 @@ const connection = mysql.createConnection({
       database: 'stairadmin',
       timezone: 'utc'
     });
-*/
-const connection = mysql.createConnection(process.env.JAWSDB_URL);
+}
+
 /// changes connection to JAWSDB
 
 router.get('/', function(req,res){
