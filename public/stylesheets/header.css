@@ -22,3 +22,15 @@
 }
 /* Change color of dropdown links on hover */
 .dropdown-menu a:hover {background-color: #f1f2f3}
+
+.onright {
+  position: absolute;
+  top: 0px;
+  right: 16px;
+  font-size: 14px;
+}
+
+div#navbar ul.nav.navbar-right li.dropdown a img {
+   border-radius: 50%;
+}
+

@@ -7,7 +7,7 @@ if(process.env.JAWSDB_URL){
 var connection = mysql.createConnection(process.env.JAWSDB_URL);  
 }
 else {
-const connection = mysql.createConnection({
+var connection = mysql.createConnection({
         host     : 'localhost',
         user     : 'stairadmin',
       password: 'ericpass',
@@ -15,15 +15,51 @@ const connection = mysql.createConnection({
       timezone: 'utc'
     });
 }
+/////////////middleware ////////////////////////////////////
+var getWeek=(req,res,next)=>{
+  console.log('in getWeek')
+  ///// date functions ////////
+  Date.prototype.getWeek = function() {
+      var sixjan = new Date(this.getFullYear(),0,6);
+      return Math.ceil((((this - sixjan) / 86400000) + sixjan.getDay()+1)/7);
+      }
+  var mysqlDate=(date)=>{
+    var YYYY=date.getFullYear();
+    var mm=date.getMonth()+1;
+    var dd=date.getDate();
+    if(mm<10){mm='0'+mm}
+    if(dd<10){dd='0'+dd}
+    var mysqldate="'"+YYYY+"-"+mm+"-"+dd+"'"
+    //console.log('mysqldate='+mysqldate)
+    return mysqldate
+  }
+  ////////////////////////////////////////////////////////
 
-router.get('/', function(req,res){
-	console.log('in router claeners')
-	var id='';
-res.render('cleaners',{id:id})
-})
+var arr=[2,1]
+  var today = new Date();
+   var end_of_week=new Date();
+    end_of_week.setDate(end_of_week.getDate() + 7-today.getDay());
+  //console.log('today=='+today+'   end_of_week='+end_of_week+
+    //' week==='+end_of_week.getWeek())
+  //console.log('week++++++++++'+end_of_week.getWeek()%2+
+    //' week ==='+arr[end_of_week.getWeek()%2])
+
+  mysqlDate(end_of_week)
+
+  req.end_of_week=mysqlDate(end_of_week)// returns date as format 'YYYY-mm-dd'
+  //end_of_week.getWeek() gives the week count from 6 jan
+  // if end_of_week.getWeek() is even it's A week if odd it's B week
+  // the freq field in db A week=1 B week=2
+  req.isNot=arr[end_of_week.getWeek()%2]
+  next();
+}
+///////////////end of middleware functions ////////////////////////////////
+//////////////////////////////////////////////
+
+
 
 router.get('/cleanerslist', function(req,res){
-  res.render('cleanerslist')
+  res.render('cleanerslist',{user:req.session.email})
 })
 
 router.get('/cleanerslist/data', function(req,res){
@@ -76,6 +112,7 @@ router.post('/cleanerslist/new',function(req,res){
   //res.end()
 })
 
+/////// populate cleaner dropdown menu /////
 router.get('/menu', function(req,res){
 	console.log('in router cleaners/menu')
 	var qry="SELECT id, cleaner"+
@@ -88,28 +125,36 @@ router.get('/menu', function(req,res){
                 res.send(rows)
             });//connection
 
-//res.end('edit')
 })
 
-router.get('/:id', function(req,res){
-	console.log('in router claeners name id')
-	var id1 = req.params.id
-    	id=id1.slice(0,id1.indexOf('&'))
-    var name = id1.slice(id1.indexOf('=')+1)
-       console.log('req.params='+id+'  '+name)
+/////// select cleaner from dropdown menu ////
+///// reneders cleaner.ejs with cleaner data ////
+router.get('/:id', getWeek,function(req,res){
+	console.log('in router claeners name id'+req.params.id)
+  var id=req.params.id
+	
     var freq=['weekly', 'A_week', 'B_week', '_3weekly','_4weekly','Monthly'];
 
-     var qry="SELECT id, stair, freq,"+
-     		" DATE_FORMAT(next_clean, '%d %b %Y') AS date from stairlist "+
-     		 " WHERE cleaner_id="+id+";";
+     var qry="SELECT s.id, s.stair, s.next_clean, c.cleaner, s.freq, s.postcode, s.lat, s.lng, "+
+     		" DATE_FORMAT(s.next_clean, '%d %b %Y') AS date from stairlist AS s"+
+        ' INNER JOIN cleaners AS c'+
+        ' ON c.id=s.cleaner_id'+
+     		 " WHERE s.cleaner_id="+id+" && s.freq !="+req.isNot+
+         " && (s.next_clean<"+req.end_of_week+
+         " || s.next_clean IS NULL)"+
+         " ORDER BY s.stair;";
+
      console.log('qry='+qry)
+     
      connection.query(qry, function(err,rows){
           if(err) throw err;
-          	console.log('freq='+freq[0])
-			res.render('cleaners',{id:id, name:name, freq:freq, rows:rows })
+          	
+			res.render('cleaners',
+        {id:id,name: rows[0].cleaner, freq:freq, rows:rows, user:req.session.email })
+            
+          
             });//connection
 
-//res.render('cleaners',{id:id, name:name})
 })
 
 module.exports = router;

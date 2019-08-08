@@ -7,7 +7,7 @@ if(process.env.JAWSDB_URL){
 var connection = mysql.createConnection(process.env.JAWSDB_URL);  
 }
 else {
-const connection = mysql.createConnection({
+var connection = mysql.createConnection({
         host     : 'localhost',
         user     : 'stairadmin',
       password: 'ericpass',
@@ -15,11 +15,36 @@ const connection = mysql.createConnection({
       timezone: 'utc'
     });
 }
+/*
+router.get('/', function(request, response) {
+	console.log('request.session'+request.session)
+	if (request.session.loggedin) {
+		response.send('Welcome back, ' + request.session.username + '!');
+	} else {
+		response.send('Please login to view this page!');
+	}
+	response.end();
+});
+*/
 
 
 router.get('/', function(req,res){
+/*
+if (req.session.loggedin) {
+	console.log('loggedin==='+req.session.loggedin)
+	console.log('req.session.id==='+req.session.id)
+	console.log('req.session.cookie=='+JSON.stringify(req.session))
+	console.log('req.session.page_views=='+req.session.page_views)
+		res.render('index',{user:req.session.username})
+		//res.send('Welcome back, ' + req.session.username + '!');
+	} else {
+		res.send('Please login to view this page!(index)');
+	}
+	res.end();
+*/
 	console.log('in router index')
-res.render('index')
+res.render('index',{user:req.session.email})
+
 })
 
 router.get('/export', function(req,res){

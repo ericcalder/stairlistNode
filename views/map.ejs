@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    
+    <% include ../views/partials/head %>
+    <link rel='stylesheet' href='/stylesheets/header.css' />
+    
+    <style>
+       /* Set the size of the div element that contains the map */
+      #map {
+        height: 400px;  /* The height is 400 pixels */
+        width: 100%;  /* The width is the width of the web page */
+       }
+    </style>
+  </head>
+<header>
+  <% include ../views/partials/header %>
+</header>
+    
+  
+  <body>
+    <h3>My Google Maps Demo</h3>
+    <h4><%=markers[0].stair%>markers.length=<%=markers.length%></h4>
+   
+    <h5 id='markerLen'><%=markers.length %></h5>
+    
+   
+    <table id='markers'>
+      <tbody>
+         <%for(var k=0;k<locals.markers.length;k++){%>
+        <tr>
+          <td><%=markers[k].stair%></td>
+          <td><%=markers[k].lat%></td>
+          <td><%=markers[k].lng%></td>
+        </tr>
+         <% } %> 
+      </tbody>
+    </table>
+    <!--The div element for the map -->
+    <div id="map"></div>
+    <script>
+      $('#markers').hide();
+      var content=[]
+        var marker=[]
+        var len=parseInt($('body h5#markerLen').text())
+        //var len=10;
+        for(var k=0;k<len;k++){
+        var latlng={}
+        latlng.lat=parseFloat($('body table tbody tr:eq('+k+') td:eq(1)').text());
+        latlng.lng=parseFloat($('body table tbody tr:eq('+k+') td:eq(2)').text());
+        console.log('latlng===='+JSON.stringify(latlng));
+        marker.push(latlng)
+        content.push($('body table tbody tr:eq('+k+') td:eq(0)').text())
+      }
+      console.log('marker='+JSON.stringify(marker))
+      console.log('marker[0]==='+JSON.stringify(marker[0]))
+      console.log('content=='+content)
+      
+// Initialize and add the map
+function initMap() {
+ 
+  // map options
+  var options = {
+      zoom:13,
+      center:{lat:55.9533, lng:-3.1883}
+      
+    }//options
+  // new map
+    var map = new google.maps.Map(document.getElementById('map'), options);
+  
+    // icon
+  var icon = 'https://developers.google.com/maps/documentation/javascript/examples/full/images/info-i_maps.png';
+ 
+  //////////////////////////////////
+
+/////////////////////////////////
+  for(var i=0;i<len;i++){
+    addMarker({coords:marker[i],
+      content:content[i]
+    })  
+  }
+ 
+
+  function addMarker(props){
+    var marker = new google.maps.Marker({
+      position: props.coords,
+      content: props.content, 
+      map: map,
+      //icon: icon
+    });
+    if(props.content){
+      var infoWindow=new google.maps.InfoWindow({
+        content:props.content
+      })
+
+      marker.addListener('mouseover', function(){
+        if (!infoWindow.getMap()){
+        infoWindow.open(map,marker);
+          }// if
+      })//mouseover
+    marker.addListener('mouseout', function() {
+    infoWindow.close();
+    });
+    }//mouseout
+  }//add marker
+}//init map
+
+    </script>
+    <!--Load the API from the specified URL
+    * The async attribute allows the browser to render the page while the API loads
+    * The key parameter will contain your own API key (which is not needed for this tutorial)
+    * The callback parameter executes the initMap() function
+    -->
+    <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDOzqzaTTfXUp9-NtSJCnpaK59YibAZJeQ&callback=initMap">
+    </script>
+  </body>
+  
+</html>
+
