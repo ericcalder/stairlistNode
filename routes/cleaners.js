@@ -127,6 +127,32 @@ router.get('/menu', function(req,res){
 
 })
 
+router.get('/all',function(req,res){
+ console.log('in router get all req.params=='+req.query.id+'req.query== '
+  +JSON.stringify(req.query))
+ var id=req.query.id;
+ var freq=['weekly', 'A_week', 'B_week', '_3weekly','_4weekly','Monthly'];
+ var qry="SELECT s.id, s.stair, s.next_clean, c.cleaner,"+ 
+            " s.freq, s.postcode, s.lat, s.lng, "+
+        " DATE_FORMAT(s.next_clean, '%d %b %Y') AS date from stairlist AS s"+
+        ' INNER JOIN cleaners AS c'+
+        ' ON c.id=s.cleaner_id'+
+         ' WHERE s.cleaner_id='+id+
+         " ORDER BY s.stair;";
+ console.log('qry=='+qry)
+ connection.query(qry, function(err,rows){
+          if(err) throw err;
+       
+      res.locals.all=true    
+      res.render('cleaners',
+        {id:id,name: rows[0].cleaner, freq:freq, rows:rows, user:req.session.email })
+      //res.send(rows)      
+          
+            });//connection
+// res.end('hellotest')
+ //res.render('index')
+})
+
 /////// select cleaner from dropdown menu ////
 ///// reneders cleaner.ejs with cleaner data ////
 router.get('/:id', getWeek,function(req,res){
@@ -148,13 +174,17 @@ router.get('/:id', getWeek,function(req,res){
      
      connection.query(qry, function(err,rows){
           if(err) throw err;
-          	
+       
+      res.locals.all=false  	
 			res.render('cleaners',
         {id:id,name: rows[0].cleaner, freq:freq, rows:rows, user:req.session.email })
             
           
             });//connection
 
-})
+});
+
+
+
 
 module.exports = router;

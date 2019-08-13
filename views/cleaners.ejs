@@ -68,14 +68,24 @@ div.box{
   <div class='box'>
     <button id='show_map'>Map</button>
     <button id='print'>Print</button>
+     <% if(!locals.all) { %>
+     <a id='link2'><span> Show All</span></a>
+     <% } %>
   </div>
   <div class='row'>
       <div class="col-sm-4"><h3><%=name%></h3></div>
+      <% if(!locals.all) { %>
       <div class="col-sm-6"></div>
       <div class="col-sm-2"></div>
+      <% } %>
     </div>
   <h4><%=rows.length%> stairs</h4>
-
+  <% if(!locals.all) { %>
+  <h4>This weeks Stairs == res.locals.all=<%=all%></h4>
+  <% } else { %>
+  
+    <h4>All Stairs == res.locals.all=<%=all%></h4>
+    <% } %>
       <% var rows=rows %>
   
   
@@ -141,6 +151,8 @@ Date.prototype.toShortFormat = function() {
         .append('<h3>Week Ending: '+end_of_week.toShortFormat()+'</h3>')
      $('body div.row div.col-sm-2').append('<h3>'+wk[week_no%2]+'</h3>')
 ////////////////////////////////////////////////
+var id=<%-id%>;
+console.log('value of id====++'+id)
   
 $('.box #show_map').on('click',function(){
   console.log('in show_map')
@@ -169,5 +181,36 @@ document.location.href = '/map?markers='+JSON.stringify(markers)
     $('.box').css({'display': 'none'})
     print();
   })
+
+$('div.box a').on('click', function(e){
+  console.log('in <a>')
+  //var id = 2;
+    var strLink = "all?id=" + id;
+    $('#link2').hide();
+    document.getElementById("link2").setAttribute("href",strLink);
+
+
+})
+
+$('div.box button#all').on('click', function(e){
+    console.log('in show all')
+    var id=<%-id%>;
+    var freq=['weekly', 'A_week', 'B_week', '_3weekly','_4weekly','Monthly'];
+    console.log('id=='+id)
+    $.get('/cleaners/all/:id',{id:id},function(rows){
+      console.log('get all #stairs='+rows.length)
+      console.log('rows===='+JSON.stringify(rows))
+     $('body h4').empty().append(rows.length+'stairs')
+      $('.table tbody').empty();
+      for(k=0;k<rows.length;k++){
+      $('.table tbody').append('<tr><td>'+rows[k].stair+'</td><td>'
+        +freq[rows[k].freq]+'</td><td>'
+        +rows[k].date+'</td><td>'
+        +rows[k].cleaner+'</td></tr>')
+      }
+      
+    })
+
+});
 
 </script>
