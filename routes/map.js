@@ -16,31 +16,34 @@ var connection = mysql.createConnection({
     });
 }
 
-
+/*
 var googleMapsClient = require('@google/maps').createClient({
-  key: process.env.API_KEY//'AIzaSyDOzqzaTTfXUp9-NtSJCnpaK59YibAZJeQ'
+  key: process.env.GEO_CODE_API_KEY
 });
-
+*/
 /////////middleware ///
+/*
 const fetch=(req, res, next)=>{
 	console.log('in fetch')
 	console.log('id=='+req.query.id)
 	console.log('rows=='+req.query.rows[0].stair)
 	var qry='SELECT stair, lat, lng from stairlist'+
 			' WHERE cleaner_id='+req.query.id+';';
-			console.log('qry=='+qry)
+			//console.log('qry=='+qry)
 			connection.query(qry, function(err,rows){
           if(err) throw err;
-           // console.log('Data received from Db:\n');
-           // console.log('the variable rows====',rows);
+           
             console.log('rows=='+JSON.stringify(rows))
                 req.markers=rows
                 next()
-                //res.send(rows)
+           
             });//connection
 	
 }
-
+*/
+//// this is the middleware for the 'map/show_map' route 
+//// don't really need this 
+/*
 var getGeo=(req,res,next)=>{
 	googleMapsClient.geocode({
   		address: '1600 Amphitheatre Parkway, Mountain View, CA'
@@ -56,6 +59,7 @@ var getGeo=(req,res,next)=>{
 	);//googleMapsClient
 
 }
+*/
 //////////////////////////////////
 
 router.get('/', function(req,res){
@@ -63,13 +67,13 @@ router.get('/', function(req,res){
 	console.log('in router map')
 	var mm=req.query.markers
 	console.log('data=='+req.query.markers)
-	console.log('mm==='+JSON.parse(mm)[0])
+	//console.log('mm==='+JSON.parse(mm)[0])
 	//console.log('markers==='+markers)
-	res.locals.apikey=JSON.stringify(process.env.API_KEY);
+	//res.locals.apikey=JSON.stringify(process.env.API_KEY);
 res.render('map',{user:req.session.email, markers:JSON.parse(mm)})
 
 })
-
+/*
 router.get('/show_map', getGeo, function(req,res){
 	console.log('in router show_map')
 	
@@ -77,6 +81,6 @@ router.get('/show_map', getGeo, function(req,res){
 	res.send('hello'+JSON.stringify(req.data))
 	
 });//
-
+*/
 module.exports = router;
 
