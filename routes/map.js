@@ -16,6 +16,11 @@ var connection = mysql.createConnection({
     });
 }
 
+
+var googleMapsClient = require('@google/maps').createClient({
+  key: process.env.API_KEY//'AIzaSyDOzqzaTTfXUp9-NtSJCnpaK59YibAZJeQ'
+});
+
 /////////middleware ///
 const fetch=(req, res, next)=>{
 	console.log('in fetch')
@@ -36,6 +41,21 @@ const fetch=(req, res, next)=>{
 	
 }
 
+var getGeo=(req,res,next)=>{
+	googleMapsClient.geocode({
+  		address: '1600 Amphitheatre Parkway, Mountain View, CA'
+			}, function(err, res) {
+  				if (!err) {
+    				console.log(res.json.results);
+  					req.data=res.json.results;	
+  				}// if
+  			//res.send('hello'+res.json.results);
+  			next();
+  			}//callback
+  			
+	);//googleMapsClient
+
+}
 //////////////////////////////////
 
 router.get('/', function(req,res){
@@ -45,15 +65,18 @@ router.get('/', function(req,res){
 	console.log('data=='+req.query.markers)
 	console.log('mm==='+JSON.parse(mm)[0])
 	//console.log('markers==='+markers)
+	res.locals.apikey=JSON.stringify(process.env.API_KEY);
 res.render('map',{user:req.session.email, markers:JSON.parse(mm)})
 
 })
 
-router.get('/show_map', fetch, function(req,res){
+router.get('/show_map', getGeo, function(req,res){
 	console.log('in router show_map')
-	console.log('req.markers=='+req.markers)
-	res.send(req.markers);
-})
+	
+	
+	res.send('hello'+JSON.stringify(req.data))
+	
+});//
 
 module.exports = router;
 

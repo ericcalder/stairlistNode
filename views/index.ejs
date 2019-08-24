@@ -30,15 +30,13 @@
 
   <h4>Week Ending: </h4>
   <h5></h5>
-  <select>
-    <option value=0>All</option>
-    <option value=2>A_week</option>
-    <option value=1>B_week</option>
-  </select>
-  <p></p>
+  <h3 id='count'></h4>
+  
   
   <div class='container'>
-  
+    <table class='table'></table>
+  <button id='show' onclick='showStairs()'>show Stairs</button>
+    <button hidden id='download' onclick='doCsv()'>download</button>
   </div>
 	 
    
@@ -54,6 +52,57 @@
 
 <script>
 
+  function doCsv(){
+    console.log('in doCsv()   ')
+    var rows = document.querySelectorAll('.container table tr');
+    // Construct csv
+    var csv = [];
+    for (var i = 0; i < rows.length; i++) {
+        var row = [], cols = rows[i].querySelectorAll('td, th');
+        for (var j = 0; j < cols.length; j++) {
+            // Clean innertext to remove multiple spaces and jumpline (break csv)
+            var data = cols[j].innerText.replace(/(\r\n|\n|\r)/gm, '').replace(/(\s\s)/gm, ' ')
+            // Escape double-quote with double-double-quote (see https://stackoverflow.com/questions/17808511/properly-escape-a-double-quote-in-csv)
+            data = data.replace(/"/g, '""');
+            // Push escaped string
+            row.push('"' + data + '"');
+        }
+        csv.push(row.join(','));
+    }
+    var csv_string = csv.join('\n');
+    console.log('csv_string==='+csv_string)
+
+    var data='hello world'
+    var data=[['hello','world', 21.6]+'\n'+['hi','world', 2.21]]
+    var myLink=document.createElement('a');
+    myLink.download='csvfile.csv';
+    myLink.href="data:application/csv,"+ csv_string ;//escape(data);
+   myLink.click();
+  }
+
+  function showStairs(){
+    console.log('in show')
+    var freq=['weekly', 'A_week', 'B_week', '_3weekly','_4weekly','Monthly'];
+    $.get('index/show',function(data){
+      console.log('get stairs')
+      $('.container table').append('<thead><th>Stair</th>'+
+        '<th>Frequency</th>'+
+        '<th>Next Clean</th>'+
+        '<th>Cleaner</th></thead><tbody>')
+      for(k=0;k<data.length;k++){
+      $('.container table').append('<tr>'+
+        '<td>'+data[k].stair+'</td>'+
+        '<td>'+freq[data[k].freq]+'</td>'+
+        '<td>'+data[k].date+'</td>'+
+        '<td>'+data[k].cleaner+'</td>'+
+        '</tr>')
+      }
+      $('.container table').append('</tbody>')
+      $('.container button#download').show()
+      $('.container button#show').hide()
+      $('body h3#count').append('Stair count: '+data.length)
+    })
+  }
   ///////////////////////////////
   Date.prototype.toShortFormat = function() {
 

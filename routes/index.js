@@ -15,103 +15,75 @@ var connection = mysql.createConnection({
       timezone: 'utc'
     });
 }
-/*
-router.get('/', function(request, response) {
-	console.log('request.session'+request.session)
-	if (request.session.loggedin) {
-		response.send('Welcome back, ' + request.session.username + '!');
-	} else {
-		response.send('Please login to view this page!');
-	}
-	response.end();
-});
-*/
+//////////// middleware ///////////////////////////
+var getWeek=(req,res,next)=>{
+  console.log('in getWeek')
+  ///// date functions ////////
+  Date.prototype.getWeek = function() {
+      var sixjan = new Date(this.getFullYear(),0,6);
+      return Math.ceil((((this - sixjan) / 86400000) + sixjan.getDay()+1)/7);
+      }
+  var mysqlDate=(date)=>{
+    var YYYY=date.getFullYear();
+    var mm=date.getMonth()+1;
+    var dd=date.getDate();
+    if(mm<10){mm='0'+mm}
+    if(dd<10){dd='0'+dd}
+    var mysqldate="'"+YYYY+"-"+mm+"-"+dd+"'"
+    //console.log('mysqldate='+mysqldate)
+    return mysqldate
+  }
+  ////////////////////////////////////////////////////////
 
+var arr=[2,1]
+  var today = new Date();
+   var end_of_week=new Date();
+    end_of_week.setDate(end_of_week.getDate() + 7-today.getDay());
+  //console.log('today=='+today+'   end_of_week='+end_of_week+
+    //' week==='+end_of_week.getWeek())
+  //console.log('week++++++++++'+end_of_week.getWeek()%2+
+    //' week ==='+arr[end_of_week.getWeek()%2])
 
+  mysqlDate(end_of_week)
+
+  req.end_of_week=mysqlDate(end_of_week)// returns date as format 'YYYY-mm-dd'
+  //end_of_week.getWeek() gives the week count from 6 jan
+  // if end_of_week.getWeek() is even it's A week if odd it's B week
+  // the freq field in db A week=1 B week=2
+  req.isNot=arr[end_of_week.getWeek()%2]
+  next();
+}
+////////////////////////////////////////////
 router.get('/', function(req,res){
-/*
-if (req.session.loggedin) {
-	console.log('loggedin==='+req.session.loggedin)
-	console.log('req.session.id==='+req.session.id)
-	console.log('req.session.cookie=='+JSON.stringify(req.session))
-	console.log('req.session.page_views=='+req.session.page_views)
-		res.render('index',{user:req.session.username})
-		//res.send('Welcome back, ' + req.session.username + '!');
-	} else {
-		res.send('Please login to view this page!(index)');
-	}
-	res.end();
-*/
-	console.log('in router index')
-res.render('index',{user:req.session.email})
-
+res.render('index',{ user:req.session.email})
 })
 
-router.get('/export', function(req,res){
-	console.log('in index/export')
-	console.log('req.query=='+req.query.week)
-	console.log('req.query=='+req.query.weekEnd)
-	var week=req.query.week;
-	var weekEnd=req.query.weekEnd;
-	var qry="SELECT * from cleaners;";
-	console.log('qry='+qry)
-	var csv='';
-	var header='id, stair, frequency, cleaner, next_clean \r\n';
-	var csv=header;
-	var cleaners=[]
+router.get('/show', getWeek, function(req,res){
+	console.log('in router index  '+req.end_of_week)
 	var freq=['weekly', 'A_week', 'B_week', '_3weekly','_4weekly','Monthly'];
-	cleanerList(cleaners,cb);
-	function cleanerList(cleaners, cb){
-		connection.query(qry, function(err, rows){
-			if(err) throw err;
-			rows.forEach( (row) =>{
-				cleaners.push([[row.id],[row.cleaner]])
-			})//for each
-			cb();
-			
-		})//conn
-		//cb();
-	}//func
-    function cb(){
-    	console.log('in callback+'+cleaners)
-    ///////////////////////////////////////////////
-    var qry="SELECT id, stair, freq, cleaner_id,"+
-    		" DATE_FORMAT(next_clean, '%d %b %Y') AS date from stairlist"+
-    		" WHERE freq!="+week+" &&(next_clean is null || next_clean<'"+weekEnd+"')"+
-    		" order by cleaner_id limit 20;";
-	console.log('qry='+qry)
-    	connection.query(qry, function(err,rows){
+	 var qry="SELECT s.id, s.stair, s.next_clean, c.cleaner, s.freq, s.postcode, s.lat, s.lng, "+
+     		" DATE_FORMAT(s.next_clean, '%d %b %Y') AS date from stairlist AS s"+
+        ' INNER JOIN cleaners AS c'+
+        ' ON c.id=s.cleaner_id'+
+     		 " WHERE s.freq !="+req.isNot+
+         " && (s.next_clean<"+req.end_of_week+
+         " || s.next_clean IS NULL)"+
+         " ORDER BY c.cleaner, s.stair;";
+
+     console.log('qry='+qry)
+     connection.query(qry, function(err,rows){
           if(err) throw err;
-
-          rows.forEach( (row) => { 
-			  //console.log(`${row.id} has cleaner: ${row.cleaner}`);
-			  //cleaners.push([[row.id],[row.cleaner]])
-			  csv=csv+row.id+','+row.stair+','+freq[row.freq]+','+
-			  cleaners[row.cleaner_id-1][1]+','+row.date+'\r\n'
-	 
-			  			});/// rows.forEach( (
-		console.log('csv='+csv)   
-		//console.log('cleaners arr='+cleaners[1])
-		fs.writeFile('C:/tmp/my_csv.csv',csv,function(err){
-			res.setHeader('content-type', 'text/csv');
-			res.download('C:/tmp/my_csv.csv')
-		})//fs.write callback      
-                //res.send(rows)
-                
+       
+      res.locals.rows=rows  
+      //res.local.freq=freq	
+		//res.render('index',{rows:rows, user:req.session.email})	         
+          res.send(rows)
             });//connection
-    
-    /////////////////////////////////////////////	
-    }//callback
-    
-})//router.get
 
-function processRow(row,csv) {
-	csv=csv+row.id+','+row.cleaner+'\r\n'
-	console.log('csv in func='+csv)
-  //fs.appendFile('C:/tmp/my_csv.csv', row.id+','+row.cleaner+'\r\n', function (err) {
-    //connection.resume();
-  //});
-}
+	
+//res.render('index',{rows:rows, user:req.session.email})
+
+})
 
 module.exports = router;
 

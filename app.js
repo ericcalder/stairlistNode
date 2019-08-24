@@ -1,3 +1,4 @@
+require('dotenv').config()
 var express=require('express');
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
@@ -5,6 +6,8 @@ var path = require('path');
 var fs = require('fs');
 const mysql=require('mysql');
 var session = require('express-session');
+
+
 
 let port = process.env.PORT;
 if (port == null || port == "") {

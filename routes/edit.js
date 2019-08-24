@@ -22,7 +22,7 @@ var options = {
  
   // Optional depending on the providers
   httpAdapter: 'https', // Default
-  apiKey: 'AIzaSyDOzqzaTTfXUp9-NtSJCnpaK59YibAZJeQ', // for Mapquest, OpenCage, Google Premier
+  apiKey: process.env.API_KEY, // for Mapquest, OpenCage, Google Premier
   zoom: 13         // 'gpx', 'string', ...
 };
  
