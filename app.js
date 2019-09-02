@@ -6,7 +6,7 @@ var path = require('path');
 var fs = require('fs');
 const mysql=require('mysql');
 var session = require('express-session');
-
+var crypto = require('crypto');
 
 
 let port = process.env.PORT;
@@ -54,13 +54,29 @@ app.use(session({
     }
 }));
 ////// custom middleware //////////
+//// hash password using sha512 algorithm ///
+const hashpw=(req,res,next)=>{
+	console.log('in hashpw')
+	var password=req.body.password
+	var salt='123'
+		var sha512 = function(password, salt){
+		    var hash = crypto.createHmac('sha512', salt); /** Hashing algorithm sha512 */
+		    hash.update(password);
+		    var value = hash.digest('hex');
+		    return value
+		};
 
+req.passwordHash=sha512(password,salt);
+//console.log('passwordHash==='+req.passwordHash+'len=='+req.passwordHash.length)
+	next();
+}
 const logIn=(req,res, next)=>{
 	var password = req.body.password;
+	var pwhash=req.passwordHash;
 	var email = req.body.email;
 	console.log('params=  '+password+' '+email)
-	var qry='SELECT * FROM users WHERE email = ? AND password = ?';
-	connection.query(qry, [email, password], function(error, results, fields) {
+	var qry='SELECT * FROM users WHERE email = ? AND pwhash = ?';
+	connection.query(qry, [email, pwhash], function(error, results, fields) {
 		if (results.length > 0) {
 					req.session.loggedin = true;
 					req.session.authenticated = true;
@@ -93,7 +109,7 @@ app.get('/', function(req,res){
 res.render('login');
 });
 
-app.post('/', logIn,  function(req, res){
+app.post('/', hashpw, logIn,  function(req, res){
 	console.log('in post')
 	if(req.session.loggedin){
 		res.render('index',{user:req.session.email})

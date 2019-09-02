@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "@google/maps": "^0.5.5",
+    "bcrypt-nodejs": "0.0.3",
     "body-parser": "^1.18.3",
     "cookie-parser": "^1.4.4",
     "csv-reader": "^1.0.3",
