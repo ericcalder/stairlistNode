@@ -44,6 +44,10 @@ app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 ///////////////////////////////
+if(process.env.JAWSDB_URL){
+var options = mysql.createConnection(process.env.JAWSDB_URL);  
+}
+else {
 var options = {
     host: 'localhost',
     port: 3306,
@@ -51,6 +55,7 @@ var options = {
     password: process.env.MYSQL_PW,
     database: 'stairadmin'
 };
+}
 var sessionStore = new MySQLStore(options);
 ///////////////////////////////
 
