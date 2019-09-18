@@ -10,7 +10,7 @@ else {
 var connection = mysql.createConnection({
         host     : 'localhost',
         user     : 'stairadmin',
-      password: 'ericpass',
+      password: process.env.MYSQL_PW,
       database: 'stairadmin',
       timezone: 'utc'
     });

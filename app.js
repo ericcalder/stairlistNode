@@ -90,7 +90,7 @@ const logIn=(req,res, next)=>{
 	var password = req.body.password;
 	var pwhash=req.passwordHash;
 	var email = req.body.email;
-	console.log('params=  '+password+' '+email)
+	//console.log('params=  '+password+' '+email)
 	var qry='SELECT * FROM users WHERE email = ? AND pwhash = ?';
 	connection.query(qry, [email, pwhash], function(error, results, fields) {
 		if (results.length > 0) {
