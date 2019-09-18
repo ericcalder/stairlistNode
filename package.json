@@ -21,5 +21,8 @@
     "express-session": "^1.15.6",
     "mysql": "^2.16.0",
     "node-geocoder": "^3.23.0"
+  },
+  "engines": {
+    "node": "11.x"
   }
 }
