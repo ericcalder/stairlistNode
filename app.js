@@ -56,7 +56,7 @@ var options = {
     database: 'stairadmin'
 };
 }
-var sessionStore = new MySQLStore(options);
+var sessionStore = new MySQLStore(options,connection);
 ///////////////////////////////
 
 app.use(session({
@@ -98,6 +98,7 @@ const logIn=(req,res, next)=>{
 					req.session.authenticated = true;
 					req.session.email = email;
 					console.log('results='+results)
+					console.log('req.session.loggedin==='+req.session.loggedin)
 		next();
 		}
 		 else {
@@ -128,7 +129,7 @@ res.render('login');
 app.post('/', hashpw, logIn,  function(req, res){
 	console.log('in post')
 	if(req.session.loggedin){
-		res.render('index',{user:req.session.email})
+		res.redirect('index')//,{user:req.session.email})
 	}
 	
 	//res.send('logged in')
